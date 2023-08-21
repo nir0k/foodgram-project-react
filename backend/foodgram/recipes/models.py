@@ -14,7 +14,12 @@ class Tag(models.Model):
 
 class Recipe(models.Model):
     # ingredients
-    tags = models.ManyToManyField(Tag)
+    author = models.ForeignKey(
+        User,
+        related_name='author',
+        on_delete=models.CASCADE
+    )
+    tags = models.ManyToManyField(Tag, through='TagRecipe')
     image = models.ImageField(
         upload_to='recipes/images/',
         null=True,
@@ -33,6 +38,14 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class TagRecipe(models.Model):
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.recipe} {self.tag}'
 
 
 class Ingredient(models.Model):

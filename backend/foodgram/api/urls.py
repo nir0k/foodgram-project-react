@@ -22,7 +22,7 @@ router.register(r'recipes/(?P<recipe>\d+)/favorite', FavoritesViewSet)
 router.register(r'ingredients', IngredientsViewSet)
 
 urlpatterns = [
-    path(r'^auth/', include('djoser.urls.authtoken')),
+    path('auth/', include('djoser.urls.authtoken')),
     path('users/set_password',
          ChangePasswordView.as_view(),
          name='set_password'),

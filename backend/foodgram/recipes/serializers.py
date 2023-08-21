@@ -5,6 +5,8 @@ from django.core.files.base import ContentFile
 from rest_framework import serializers
 
 from .models import Recipe, Tag, Favorite, Ingredient
+from users.serializer import UserSerializer
+# from django.shortcuts import get_object_or_404
 
 
 # class Hex2NameColor(serializers.Field):
@@ -31,6 +33,8 @@ class Base64ImageField(serializers.ImageField):
 
 
 class TagSerializer(serializers.ModelSerializer):
+    # color = Hex2NameColor()
+
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
@@ -46,12 +50,46 @@ class FavoriteSerializer(serializers.ModelSerializer):
         }
 
 
-class RecipeSerializer(serializers.ModelSerializer):
-    tags = serializers.StringRelatedField(many=True, read_only=True)
+class RecipeGetSerializer(serializers.ModelSerializer):
+    author = UserSerializer(read_only=True)
+    tags = TagSerializer(many=True, read_only=True)
+    image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'image', 'name', 'text', 'cooking_time')
+        fields = (
+            'id',
+            'tags',
+            'author',
+            # 'ingradients',
+            # 'is_favorited',
+            # 'is_in_shopping_cart',
+            'image',
+            'name',
+            'text',
+            'cooking_time')
+
+
+class RecipePostSerializer(serializers.ModelSerializer):
+    author = UserSerializer(read_only=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(),
+        many=True)
+    image = Base64ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'tags',
+            'author',
+            # 'ingradients',
+            # 'is_favorited',
+            # 'is_in_shopping_cart',
+            'image',
+            'name',
+            'text',
+            'cooking_time')
 
 
 class IngredientSerializer(serializers.ModelSerializer):
