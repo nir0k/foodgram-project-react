@@ -8,7 +8,9 @@ from recipes.views import (
     TagsViewSet,
     RecipesViewSet,
     IngredientsViewSet,
-    FavoritesViewSet)
+    FavoritesViewSet,
+    IngradientRecipeView,
+)
 from users.views import UsersViewSet, ChangePasswordView
 
 
@@ -20,6 +22,7 @@ router.register(r'recipes', RecipesViewSet)
 # router.register(r'recipes/download_shopping_cart')
 router.register(r'recipes/(?P<recipe>\d+)/favorite', FavoritesViewSet)
 router.register(r'ingredients', IngredientsViewSet)
+router.register(r'ingredientsrecipes', IngradientRecipeView)
 
 urlpatterns = [
     path('auth/', include('djoser.urls.authtoken')),

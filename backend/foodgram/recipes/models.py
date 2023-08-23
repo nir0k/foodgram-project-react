@@ -12,8 +12,17 @@ class Tag(models.Model):
         return self.name
 
 
+class Ingredient(models.Model):
+    name = models.CharField(max_length=254)
+    measurement_unit = models.CharField(max_length=2)
+
+    def __str__(self):
+        return self.name
+
+
 class Recipe(models.Model):
-    # ingredients
+    ingredients = models.ManyToManyField(
+        Ingredient, through='IngradientRecipe')
     author = models.ForeignKey(
         User,
         related_name='author',
@@ -48,12 +57,14 @@ class TagRecipe(models.Model):
         return f'{self.recipe} {self.tag}'
 
 
-class Ingredient(models.Model):
-    name = models.CharField(max_length=254)
-    measurement_unit = models.CharField(max_length=2)
+class IngradientRecipe(models.Model):
+    ingradient = models.ForeignKey(Ingredient, on_delete=models.CASCADE,
+                                   related_name='ingredients',)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    amount = models.FloatField(null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return f'{self.recipe} {self.ingradient} {self.amount}'
 
 
 class Favorite(models.Model):
