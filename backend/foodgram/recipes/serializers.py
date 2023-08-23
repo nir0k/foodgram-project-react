@@ -124,13 +124,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
         response['tags'] = response.pop('tags_show')
         return response
 
-    def create(self, validated_data):
-        ingredients_data = validated_data.pop('recipe_ingredients')
-        tags_data = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
-        for tag_data in tags_data:
-            tag = get_object_or_404(Tag, pk=tag_data.id)
-            TagRecipe.objects.create(recipe=recipe, tag=tag)
+    def list_of_ingredients(self, recipe, ingredients_data):
         for ingredient_data in ingredients_data:
             ingredient = get_object_or_404(
                 Ingredient,
@@ -141,4 +135,28 @@ class RecipePostSerializer(serializers.ModelSerializer):
                 ingredient=ingredient,
                 amount=ingredient_data.get('amount')
             )
+
+    def list_of_tags(self, recipe, tags_data):
+        for tag_data in tags_data:
+            tag = get_object_or_404(Tag, pk=tag_data.id)
+            TagRecipe.objects.create(recipe=recipe, tag=tag)
+
+    def create(self, validated_data):
+        ingredients_data = validated_data.pop('recipe_ingredients')
+        tags_data = validated_data.pop('tags')
+        recipe = Recipe.objects.create(**validated_data)
+        self.list_of_tags(recipe=recipe, tags_data=tags_data)
+        self.list_of_ingredients(
+            recipe=recipe, ingredients_data=ingredients_data)
         return recipe
+
+    def update(self, instance, validated_data):
+        ingredients_data = validated_data.pop('recipe_ingredients')
+        tags_data = validated_data.pop('tags')
+        super().update(instance, validated_data)
+        instance.ingredients.clear()
+        instance.tags.clear()
+        self.list_of_tags(recipe=instance, tags_data=tags_data)
+        self.list_of_ingredients(
+            recipe=instance, ingredients_data=ingredients_data)
+        return instance
