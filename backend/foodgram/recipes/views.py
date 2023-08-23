@@ -4,14 +4,12 @@ from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Tag, Favorite, Recipe, Ingredient, IngredientRecipe
+from .models import Tag, Favorite, Recipe, Ingredient
 from .serializers import (
     TagSerializer,
     FavoriteSerializer,
-    RecipeGetSerializer,
     RecipePostSerializer,
     IngredientSerializer,
-    # IngradientRecipeSerializer,
 )
 
 
@@ -49,12 +47,7 @@ class FavoritesViewSet(viewsets.ModelViewSet):
 
 class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    # serializer_class = RecipePostSerializer
-
-    def get_serializer_class(self):
-        if self.request.method == 'POST':
-            return RecipePostSerializer
-        return RecipeGetSerializer
+    serializer_class = RecipePostSerializer
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -63,8 +56,3 @@ class RecipesViewSet(viewsets.ModelViewSet):
 class IngredientsViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-
-
-class IngradientRecipeView(viewsets.ModelViewSet):
-    queryset = IngredientRecipe.objects.all()
-    serializer_class = RecipePostSerializer

@@ -22,7 +22,10 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     ingredients = models.ManyToManyField(
-        Ingredient, through='IngredientRecipe')
+        Ingredient,
+        through='RecipeIngredient',
+        verbose_name="ingredients"
+    )
     author = models.ForeignKey(
         User,
         related_name='author',
@@ -49,18 +52,34 @@ class Recipe(models.Model):
         return self.name
 
 
-class IngredientRecipe(models.Model):
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+class RecipeIngredient(models.Model):
+    ingredient = models.ForeignKey(Ingredient,
+                                   on_delete=models.CASCADE,
+                                   related_name="ingredients",)
+    recipe = models.ForeignKey(Recipe,
+                               on_delete=models.CASCADE,
+                               related_name="recipe_ingredients",)
     amount = models.FloatField(null=True, blank=True)
 
+    # class Meta:
+    #     # verbose_name = "Колличество ингридиентов"
+    #     constraints = [
+    #         models.UniqueConstraint(
+    #             fields=["recipe", "ingredient"],
+    #             name="value_amount",
+    #         ),
+    #     ]
+
     def __str__(self):
-        return f'{self.recipe} {self.ingradient} {self.amount}'
+        return f'{self.recipe} {self.ingredient} {self.amount}'
 
 
 class TagRecipe(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe,
+                               on_delete=models.CASCADE,
+                               related_name="recipe_tags",
+                               )
 
     def __str__(self):
         return f'{self.recipe} {self.tag}'
