@@ -5,7 +5,7 @@ from django.core.files.base import ContentFile
 from rest_framework import serializers
 
 from .models import (
-    Recipe, Tag, Favorite, Ingredient, IngradientRecipe, TagRecipe)
+    Recipe, Tag, Favorite, Ingredient, IngredientRecipe, TagRecipe)
 from users.serializer import UserSerializer
 from django.shortcuts import get_object_or_404
 
@@ -58,21 +58,21 @@ class IngredientSerializer(serializers.ModelSerializer):
         # }
 
 
-class IngradientRecipeSerializer(serializers.ModelSerializer):
+class IngredientRecipeSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(read_only=True)
     measurement_unit = serializers.SerializerMethodField(read_only=True)
     # id = serializers.SerializerMethodField(source='ingradient.id')
-    id = serializers.IntegerField(source='ingradient.id')
+    id = serializers.IntegerField(source='ingredient.id')
     # recipe_id = serializers.IntegerField(source='recipe', write_only=True)
 
     class Meta():
-        model = IngradientRecipe
+        model = IngredientRecipe
         fields = (
             'id',
             'name',
             'measurement_unit',
             'amount',
-            # 'recipe_id',
+            'recipe_id',
         )
         extra_kwargs = {
             "id": {
@@ -82,15 +82,15 @@ class IngradientRecipeSerializer(serializers.ModelSerializer):
         }
 
     def get_name(self, obj):
-        return obj.ingradient.name
+        return obj.ingredient.name
 
     def get_measurement_unit(self, obj):
-        return obj.ingradient.measurement_unit
+        return obj.ingredient.measurement_unit
 
     def create(self, validated_data):
-        ingradient = validated_data.pop('ingradient')
-        ingredientrecipe = IngradientRecipe.objects.get_or_create(
-            **validated_data, ingradient=ingradient.get('id'))
+        ingredient = validated_data.pop('ingradient')
+        ingredientrecipe = IngredientRecipe.objects.get_or_create(
+            **validated_data, ingredient=ingredient.get('id'))
 
         return ingredientrecipe
 
@@ -111,8 +111,8 @@ class FavoriteSerializer(serializers.ModelSerializer):
 class RecipeGetSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
-    ingredients = IngradientRecipeSerializer(
-        source='ingradientrecipe_set', many=True)
+    ingredients = IngredientRecipeSerializer(
+        source='ingredientrecipe_set', many=True)
     image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
@@ -136,10 +136,10 @@ class RecipePostSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(),
         many=True)
 
-    # ingredients = IngradientRecipeSerializer(
-    #     source='ingradientrecipe_set', many=True)
+    # ingredients = IngredientRecipeSerializer(
+    #     source='ingredientrecipe_set', many=True)
     ingredients = serializers.PrimaryKeyRelatedField(
-        queryset=IngradientRecipe.objects.all(),
+        queryset=IngredientRecipe.objects.all(),
         many=True)
     image = Base64ImageField(required=False, allow_null=True)
 
@@ -158,7 +158,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
             'cooking_time')
 
     # def create(self, validated_data):
-    #     ingredients_data = validated_data.pop('ingradientrecipe_set')
+    #     ingredients_data = validated_data.pop('ingredientrecipe_set')
     #     recipe = Recipe.objects.create(**validated_data)
     #     ingredients = []
     #     for ingredient_data in ingredients_data:
@@ -167,7 +167,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
     #         ingredient_amount = ingredient_data.get('amount')
     #         ingredient = get_object_or_404(Ingredient, pk=ingredient_id)
     #         ingredientrecipe, _ = IngradientRecipe.objects.get_or_create(
-    #             recipe=recipe, ingradient=ingredient, amount=ingredient_amount)
+    #             recipe=recipe, ingredient=ingredient, amount=ingredient_amount)
     #         ingredients.append(ingredient)
     #     recipe.ingredients.add(*ingredients)
     #     return recipe

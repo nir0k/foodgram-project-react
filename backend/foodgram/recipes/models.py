@@ -22,7 +22,7 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     ingredients = models.ManyToManyField(
-        Ingredient, through='IngradientRecipe')
+        Ingredient, through='IngredientRecipe')
     author = models.ForeignKey(
         User,
         related_name='author',
@@ -49,22 +49,21 @@ class Recipe(models.Model):
         return self.name
 
 
+class IngredientRecipe(models.Model):
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    amount = models.FloatField(null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.recipe} {self.ingradient} {self.amount}'
+
+
 class TagRecipe(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.recipe} {self.tag}'
-
-
-class IngradientRecipe(models.Model):
-    ingradient = models.ForeignKey(Ingredient, on_delete=models.CASCADE,
-                                   related_name='ingredients',)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    amount = models.FloatField(null=True, blank=True)
-
-    def __str__(self):
-        return f'{self.recipe} {self.ingradient} {self.amount}'
 
 
 class Favorite(models.Model):
