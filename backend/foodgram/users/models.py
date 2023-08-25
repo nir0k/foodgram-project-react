@@ -91,25 +91,27 @@ class User(AbstractBaseUser):
         return self.is_admin
 
 
-class Follow(models.Model):
-    user = models.ForeignKey(
+class Subscribe(models.Model):
+    user_id = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='follower',
-        null=True,
-        verbose_name='follower',
+        related_name='subscribing',
     )
-    author = models.ForeignKey(
+    subscribing_user_id = models.ForeignKey(
         User,
-        blank=True,
-        null=True,
         on_delete=models.CASCADE,
-        related_name='following',
-        verbose_name='following',
+        related_name='subscribers',
     )
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
-        verbose_name = 'Follow'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user_id', 'subscribing_user_id'],
+                name="unique_subscribes"
+            )
+        ]
+        ordering = ["-created"]
 
     def __str__(self):
-        return self.user
+        return f'{self.user_id} subscribers {self.subscribing_user_id}'

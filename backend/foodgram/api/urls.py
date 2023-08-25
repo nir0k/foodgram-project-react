@@ -7,14 +7,15 @@ from recipes.views import (
     IngredientsViewSet,
     FavoritesViewSet,
 )
-from users.views import UsersViewSet, ChangePasswordView
+from users.views import UsersViewSet, ChangePasswordView, SubscribeViewSet
 
 
 router = routers.DefaultRouter()
+router.register(r'users/subscriptions', SubscribeViewSet)
+router.register(r'users/(?P<id>\d+)/subscriptions', SubscribeViewSet)
 router.register(r'users', UsersViewSet)
 router.register(r'tags', TagsViewSet)
 router.register(r'recipes', RecipesViewSet)
-# router.register(r'users/subscriptions/')
 # router.register(r'recipes/download_shopping_cart')
 router.register(r'recipes/(?P<recipe>\d+)/favorite', FavoritesViewSet)
 router.register(r'ingredients', IngredientsViewSet)
