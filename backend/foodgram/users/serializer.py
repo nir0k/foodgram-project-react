@@ -1,8 +1,10 @@
-from rest_framework import serializers
-from .models import User, Subscribe
-from recipes.models import Recipe
-from rest_framework.validators import UniqueTogetherValidator
 from django.shortcuts import get_object_or_404
+from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
+
+from recipes.models import Recipe
+
+from .models import Subscribe, User
 
 
 class RecipeSerializer(serializers.ModelSerializer):

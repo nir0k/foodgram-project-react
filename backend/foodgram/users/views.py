@@ -1,17 +1,14 @@
 # from django.shortcuts import render
-from .models import User, Subscribe
-from .serializer import (
-    UserSerializer,
-    ChangePasswordSerializer,
-    SubscribeSerializer,
-)
-from rest_framework import viewsets, generics
 from django.contrib.auth.hashers import make_password
-from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import generics, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from .models import Subscribe, User
+from .serializer import (ChangePasswordSerializer, SubscribeSerializer,
+                         UserSerializer)
 
 
 class UsersViewSet(viewsets.ModelViewSet):

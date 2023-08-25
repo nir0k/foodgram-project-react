@@ -1,20 +1,15 @@
-from rest_framework import viewsets
-
-from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
-from rest_framework import status
-from .models import Tag, Favorite, Recipe, Ingredient, ShoppingCart
-from .serializers import (
-    TagSerializer,
-    FavoriteSerializer,
-    RecipeSerializer,
-    IngredientSerializer,
-    ShoppingCartSerializer
-)
+from django.db.models import BooleanField, Case, Value, When
 from django.http import HttpResponse
-from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from django.db.models import Case, When, Value, BooleanField
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from .models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
+from .serializers import (FavoriteSerializer, IngredientSerializer,
+                          RecipeSerializer, ShoppingCartSerializer,
+                          TagSerializer)
 
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
