@@ -8,7 +8,7 @@ from .models import Tag, Favorite, Recipe, Ingredient
 from .serializers import (
     TagSerializer,
     FavoriteSerializer,
-    RecipePostSerializer,
+    RecipeSerializer,
     IngredientSerializer,
 )
 
@@ -47,7 +47,7 @@ class FavoritesViewSet(viewsets.ModelViewSet):
 
 class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipePostSerializer
+    serializer_class = RecipeSerializer
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

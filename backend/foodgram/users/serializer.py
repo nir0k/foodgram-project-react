@@ -1,5 +1,4 @@
 from rest_framework import serializers
-# from rest_framework.fields import empty
 from .models import User, Subscribe
 from recipes.models import Recipe
 from rest_framework.validators import UniqueTogetherValidator

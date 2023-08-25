@@ -42,11 +42,6 @@ class Recipe(models.Model):
     cooking_time = models.IntegerField(
         validators=[MinValueValidator(1)]
     )
-    # is_favorited = models.ForeignKey(
-    #     User,
-    #     related_name='recipe_favorite',
-    #     blank=True
-    # )
 
     def __str__(self):
         return self.name

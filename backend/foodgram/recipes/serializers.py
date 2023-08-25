@@ -61,30 +61,7 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
         )
 
 
-# class RecipeGetSerializer(serializers.ModelSerializer):
-#     author = UserSerializer(read_only=True)
-#     tags = TagSerializer(many=True, read_only=True)
-#     ingredients = IngredientRecipeSerializer(many=True, source='recipe')
-#     image = Base64ImageField(required=False, allow_null=True)
-
-#     class Meta:
-#         model = Recipe
-#         fields = (
-#             'id',
-#             'tags',
-#             'author',
-#             'ingredients',
-#             # 'is_favorited',
-#             # 'is_in_shopping_cart',
-#             'image',
-#             'name',
-#             'text',
-#             'cooking_time')
-
-
-
-
-class RecipePostSerializer(serializers.ModelSerializer):
+class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
@@ -95,6 +72,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
     ingredients = IngredientRecipeSerializer(many=True,
                                              source='recipe_ingredients')
     image = Base64ImageField(required=False, allow_null=True)
+    is_favorited = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -104,7 +82,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
             'tags_show',
             'author',
             'ingredients',
-            # 'is_favorited',
+            'is_favorited',
             # 'is_in_shopping_cart',
             'image',
             'name',
@@ -152,6 +130,16 @@ class RecipePostSerializer(serializers.ModelSerializer):
         self.list_of_ingredients(
             recipe=instance, ingredients_data=ingredients_data)
         return instance
+
+    def get_is_favorited(self, obj):
+        user = self.context['request'].user
+        favorite = Favorite.objects.filter(
+            user_id=user,
+            recipe=obj
+        ).first()
+        if favorite:
+            return True
+        return False
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
