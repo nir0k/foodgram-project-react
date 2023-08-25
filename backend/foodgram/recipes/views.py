@@ -21,7 +21,7 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
 class FavoritesViewSet(viewsets.ModelViewSet):
     queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializer
-    http_method_names = ['post', 'delete']
+    http_method_names = ['post', 'delete', 'get']
 
     def create(self, request, *args, **kwargs):
         data = {

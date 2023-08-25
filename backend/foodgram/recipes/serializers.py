@@ -61,35 +61,27 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
         )
 
 
-class FavoriteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Favorite
-        fields = ('user', 'recipe')
-        extra_kwargs = {
-            "user": {"required": False},
-            "recipe": {"required": False}
-        }
+# class RecipeGetSerializer(serializers.ModelSerializer):
+#     author = UserSerializer(read_only=True)
+#     tags = TagSerializer(many=True, read_only=True)
+#     ingredients = IngredientRecipeSerializer(many=True, source='recipe')
+#     image = Base64ImageField(required=False, allow_null=True)
+
+#     class Meta:
+#         model = Recipe
+#         fields = (
+#             'id',
+#             'tags',
+#             'author',
+#             'ingredients',
+#             # 'is_favorited',
+#             # 'is_in_shopping_cart',
+#             'image',
+#             'name',
+#             'text',
+#             'cooking_time')
 
 
-class RecipeGetSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
-    tags = TagSerializer(many=True, read_only=True)
-    ingredients = IngredientRecipeSerializer(many=True, source='recipe')
-    image = Base64ImageField(required=False, allow_null=True)
-
-    class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'tags',
-            'author',
-            'ingredients',
-            # 'is_favorited',
-            # 'is_in_shopping_cart',
-            'image',
-            'name',
-            'text',
-            'cooking_time')
 
 
 class RecipePostSerializer(serializers.ModelSerializer):
@@ -160,3 +152,39 @@ class RecipePostSerializer(serializers.ModelSerializer):
         self.list_of_ingredients(
             recipe=instance, ingredients_data=ingredients_data)
         return instance
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(
+        source='recipe.id',
+        required=False)
+    name = serializers.CharField(
+        source='recipe.name',
+        required=False)
+    image = serializers.CharField(
+        source='recipe.image',
+        required=False)
+    cooking_time = serializers.IntegerField(
+        source='recipe.cooking_time',
+        required=False)
+
+    class Meta:
+        model = Favorite
+        fields = (
+            'id',
+            'user',
+            'recipe',
+            'name',
+            'image',
+            'cooking_time'
+        )
+        extra_kwargs = {
+            "user": {
+                "required": False,
+                "write_only": True
+            },
+            "recipe": {
+                "required": False,
+                "write_only": True
+            }
+        }
