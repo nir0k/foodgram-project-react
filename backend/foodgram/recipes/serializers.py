@@ -9,10 +9,12 @@ from .models import (
     Favorite,
     Ingredient,
     RecipeIngredient,
-    TagRecipe
+    TagRecipe,
+    ShoppingCart
 )
 from users.serializer import UserSerializer
 from django.shortcuts import get_object_or_404
+from rest_framework.validators import UniqueTogetherValidator
 
 
 class Base64ImageField(serializers.ImageField):
@@ -167,12 +169,55 @@ class FavoriteSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
         extra_kwargs = {
-            "user": {
-                "required": False,
-                "write_only": True
+            'user': {
+                'required': False,
+                'write_only': True
             },
-            "recipe": {
-                "required": False,
-                "write_only": True
+            'recipe': {
+                'required': False,
+                'write_only': True
             }
         }
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(
+        source='recipe.id',
+        required=False)
+    name = serializers.CharField(
+        source='recipe.name',
+        required=False)
+    image = serializers.CharField(
+        source='recipe.image',
+        required=False)
+    cooking_time = serializers.IntegerField(
+        source='recipe.cooking_time',
+        required=False)
+
+    class Meta:
+        model = ShoppingCart
+        fields = (
+            'id',
+            'user',
+            'recipe',
+            'name',
+            'image',
+            'cooking_time',
+        )
+        extra_kwargs = {
+            'user': {
+                'required': False,
+                'write_only': True
+            },
+            'recipe': {
+                'required': False,
+                'write_only': True
+            }
+        }
+        validators = [
+            UniqueTogetherValidator(
+                queryset=ShoppingCart.objects.all(),
+                fields=('user', 'recipe'),
+                message='This following already exists.'
+            )
+        ]

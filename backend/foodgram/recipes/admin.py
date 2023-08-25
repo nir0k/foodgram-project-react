@@ -6,6 +6,7 @@ from recipes.models import (
     Ingredient,
     RecipeIngredient,
     TagRecipe,
+    ShoppingCart
 )
 
 
@@ -31,3 +32,4 @@ admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Tag)
 admin.site.register(Favorite)
 admin.site.register(Ingredient)
+admin.site.register(ShoppingCart)
