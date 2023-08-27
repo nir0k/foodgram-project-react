@@ -27,7 +27,6 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
-        read_only_fields = ('name', 'color', 'slug')
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -68,8 +67,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientRecipeSerializer(many=True,
                                              source='recipe_ingredients')
     image = Base64ImageField(required=False, allow_null=True)
-    is_favorited = serializers.BooleanField()
     is_in_shopping_cart = serializers.BooleanField()
+    is_favorited = serializers.BooleanField()
 
     class Meta:
         model = Recipe

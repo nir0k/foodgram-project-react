@@ -9,6 +9,9 @@ class Tag(models.Model):
     color = models.CharField(max_length=16)
     slug = models.SlugField()
 
+    class Meta:
+        unique_together = ('name', 'color', 'slug')
+
     def __str__(self):
         return self.name
 
@@ -16,6 +19,9 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(max_length=254)
     measurement_unit = models.CharField(max_length=2)
+
+    class Meta:
+        unique_together = ('name', 'measurement_unit')
 
     def __str__(self):
         return self.name
@@ -52,10 +58,14 @@ class Recipe(models.Model):
 class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(Ingredient,
                                    on_delete=models.CASCADE,
-                                   related_name="ingredients",)
+                                   related_name="ingredients",
+                                   null=True,
+                                   blank=True,)
     recipe = models.ForeignKey(Recipe,
                                on_delete=models.CASCADE,
-                               related_name="recipe_ingredients",)
+                               related_name="recipe_ingredients",
+                               null=True,
+                               blank=True,)
     amount = models.FloatField(null=False,
                                blank=False,
                                validators=[MinValueValidator(0.1)],
@@ -75,10 +85,15 @@ class RecipeIngredient(models.Model):
 
 
 class TagRecipe(models.Model):
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag,
+                            on_delete=models.CASCADE,
+                            null=True,
+                            blank=True,)
     recipe = models.ForeignKey(Recipe,
                                on_delete=models.CASCADE,
                                related_name="recipe_tags",
+                               null=True,
+                               blank=True,
                                )
 
     def __str__(self):
@@ -90,12 +105,15 @@ class Favorite(models.Model):
         User,
         related_name='favorites',
         on_delete=models.CASCADE,
-
+        null=True,
+        blank=True,
     )
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='favorites',
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
 
     class Meta:
@@ -106,11 +124,16 @@ class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
         related_name='shoppingscart',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='shoppingscart',
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
 
     class Meta:

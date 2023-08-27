@@ -3,7 +3,7 @@ from rest_framework import routers
 
 from recipes.views import (FavoritesViewSet, IngredientsViewSet,
                            RecipesViewSet, ShoppingCartViewSet, TagsViewSet)
-from users.views import ChangePasswordView, SubscribeViewSet, UsersViewSet
+from users.views import SubscribeViewSet, UsersViewSet, change_password
 
 router = routers.DefaultRouter()
 router.register(r'users/subscriptions', SubscribeViewSet)
@@ -17,8 +17,6 @@ router.register(r'ingredients', IngredientsViewSet)
 
 urlpatterns = [
     path('auth/', include('djoser.urls.authtoken')),
-    path('users/set_password',
-         ChangePasswordView.as_view(),
-         name='set_password'),
+    path('users/set_password', change_password, name='set_password'),
     path('', include(router.urls)),
 ]

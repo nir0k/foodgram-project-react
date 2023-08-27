@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -22,6 +23,13 @@ class RecipeSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
+    def __init__(self, *args, **kwargs):
+        super(UserSerializer, self).__init__(*args, **kwargs)
+        if 'context' in kwargs:
+            if kwargs.get('context').get('request').method == 'POST':
+                if kwargs.get('context').get('request').path == '/api/users/':
+                    self.fields.pop('is_subscribed')
+
     class Meta:
         model = User
         fields = (
@@ -37,10 +45,18 @@ class UserSerializer(serializers.ModelSerializer):
             'password': {
                 'write_only': True,
                 'required': True
-            }
+            },
         }
 
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
     def get_is_subscribed(self, obj):
+        if not self.context["request"].user.pk:
+            return False
         user = self.context['request'].user
         subscribe = Subscribe.objects.filter(
             user_id=user,
@@ -51,16 +67,9 @@ class UserSerializer(serializers.ModelSerializer):
         return False
 
 
-class ChangePasswordSerializer(serializers.ModelSerializer):
-    new_password = serializers.CharField(required=True)
+class ChangePasswordSerializer(serializers.Serializer):
     current_password = serializers.CharField(required=True)
-
-    class Meta:
-        model = User
-        fields = (
-            'new_password',
-            'current_password'
-        )
+    new_password = serializers.CharField(required=True)
 
 
 class SubscribeSerializer(serializers.ModelSerializer):
@@ -123,11 +132,19 @@ class SubscribeSerializer(serializers.ModelSerializer):
         return True
 
     def get_recipes(self, obj):
-        recipes = Recipe.objects.filter(author=obj.id)
-        return RecipeSerializer(recipes, many=True).data
+        page_size = self.context['request'].query_params.get(
+            'recipes_limit') or 10
+        paginator = Paginator(
+            Recipe.objects.filter(author=obj.subscribing_user_id).all(),
+            page_size
+        )
+        page = self.context['request'].query_params.get('page') or 1
+        recipes_page = paginator.page(page)
+        serializer = RecipeSerializer(recipes_page, many=True).data
+        return serializer
 
     def get_recipes_count(self, obj):
-        return Recipe.objects.filter(author=obj.id).count()
+        return Recipe.objects.filter(author=obj.subscribing_user_id).count()
 
     def validate_subscribing_user_id(self, obj):
         subscribing = get_object_or_404(User, username=obj)

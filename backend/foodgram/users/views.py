@@ -1,9 +1,10 @@
-# from django.shortcuts import render
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth import update_session_auth_hash
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, status, viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.pagination import (LimitOffsetPagination,
+                                       PageNumberPagination)
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Subscribe, User
@@ -14,10 +15,21 @@ from .serializer import (ChangePasswordSerializer, SubscribeSerializer,
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    pagination_class = PageNumberPagination
 
-    def perform_create(self, serializer):
-        password = make_password(self.request.data['password'])
-        serializer.save(password=password)
+    def get_permissions(self):
+        if self.action in ['create', 'retrieve']:
+            return (AllowAny(),)
+        else:
+            return super().get_permissions()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         detail=False,
@@ -32,38 +44,31 @@ class UsersViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class ChangePasswordView(generics.CreateAPIView):
-    serializer_class = ChangePasswordSerializer
-    model = User
-
-    def get_object(self, queryset=None):
-        obj = self.request.user
-        return obj
-
-    def create(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        serializer = self.get_serializer(data=request.data)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    if request.method == 'POST':
+        serializer = ChangePasswordSerializer(data=request.data)
         if serializer.is_valid():
-            if not self.object.check_password(
-                serializer.data.get("current_password")
-            ):
-                return Response(
-                    {"current_password": ["Wrong password."]},
-                    status=status.HTTP_400_BAD_REQUEST)
-            self.object.set_password(serializer.data.get("new_password"))
-            self.object.save()
-            return Response(
-                {'message': 'Password updated successfully'},
-                status=status.HTTP_204_NO_CONTENT)
+            user = request.user
+            if user.check_password(serializer.data.get('current_password')):
+                user.set_password(serializer.data.get('new_password'))
+                user.save()
+                update_session_auth_hash(request, user)
+                return Response({'message': 'Password changed successfully.'},
+                                status=status.HTTP_200_OK)
+            return Response({'error': 'Incorrect current password.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SubscribeViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = SubscribeSerializer
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        queryset = self.request.user.subscribing
+        queryset = self.request.user.subscribing.all()
         return queryset
 
     def create(self, request, *args, **kwargs):

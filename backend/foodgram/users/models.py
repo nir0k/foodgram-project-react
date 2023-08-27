@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import RegexValidator
 from django.db import models
 
+CHOICES = (('admin', 'admin'), ('user', 'user'),)
+
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password=None, **extra_fields):
@@ -67,6 +69,9 @@ class User(AbstractBaseUser):
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    role = models.CharField(
+        max_length=50, choices=CHOICES, default='user', null=True, blank=True
+    )
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
@@ -96,11 +101,15 @@ class Subscribe(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='subscribing',
+        null=True,
+        blank=True,
     )
     subscribing_user_id = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='subscribers',
+        null=True,
+        blank=True,
     )
     created = models.DateTimeField(auto_now_add=True, db_index=True)
 

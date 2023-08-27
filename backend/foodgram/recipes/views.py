@@ -1,11 +1,17 @@
-from django.db.models import BooleanField, Case, Value, When
+from django.db.models import Exists, OuterRef, Value
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_condition import Or
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from users.permissions import IsAdmin, IsAuthorOrReadOnly, NonAuth, ReadOnly
+
+from .filters import RecipeFilter
 from .models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 from .serializers import (FavoriteSerializer, IngredientSerializer,
                           RecipeSerializer, ShoppingCartSerializer,
@@ -15,6 +21,9 @@ from .serializers import (FavoriteSerializer, IngredientSerializer,
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    permission_classes = (IsAdmin, ReadOnly)
+    filter_backends = (DjangoFilterBackend,)
+    search_fields = ('slug',)
 
 
 class FavoritesViewSet(viewsets.ModelViewSet):
@@ -47,30 +56,25 @@ class FavoritesViewSet(viewsets.ModelViewSet):
 class RecipesViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     queryset = Recipe.objects.all()
+    permission_classes = (
+        Or(IsAuthorOrReadOnly, NonAuth),
+    )
+    pagination_class = PageNumberPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     def get_queryset(self):
-        queryset = Recipe.objects.annotate(
-            is_in_shopping_cart=Case(
-                When(
-                    id=ShoppingCart.objects.filter(
-                        user=self.request.user,
-                        recipe_id=self.kwargs.get('pk')
-                    ).first().recipe.id,
-                    then=Value(True)),
-                default=Value(False),
-                output_field=BooleanField(),
-            ),
-            is_favorited=Case(
-                When(
-                    id=Favorite.objects.filter(
-                        user=self.request.user,
-                        recipe_id=self.kwargs.get('pk')
-                    ).first().recipe.id,
-                    then=Value(True)),
-                default=Value(False),
-                output_field=BooleanField(),
-            ),
+        if self.request.user.is_anonymous:
+            return Recipe.objects.annotate(
+                is_in_shopping_cart=Value(False),
+                is_favorited=Value(False)
+            ).all()
 
+        queryset = Recipe.objects.annotate(
+            is_favorited=Exists(Favorite.objects.filter(
+                user=self.request.user, recipe=OuterRef('pk'))),
+            is_in_shopping_cart=Exists(ShoppingCart.objects.filter(
+                user=self.request.user, recipe=OuterRef('pk')))
         ).all()
         return queryset
 
@@ -112,6 +116,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
 class IngredientsViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    pagination_class = None
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
 
 
 class ShoppingCartViewSet(viewsets.ModelViewSet):
