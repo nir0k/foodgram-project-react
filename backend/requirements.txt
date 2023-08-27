@@ -9,5 +9,5 @@ pytest==6.2.4
 pytest-django==4.4.0
 pytest-pythonpath==0.7.3
 PyYAML==6.0
-rest_condition=1.0.3
-django-filter=23.2
+rest_condition==1.0.3
+django-filter==23.2
