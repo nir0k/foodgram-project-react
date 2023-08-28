@@ -17,8 +17,12 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=254)
-    measurement_unit = models.CharField(max_length=2)
+    name = models.CharField(max_length=254, null=False, blank=False)
+    measurement_unit = models.CharField(
+        max_length=100,
+        null=False,
+        blank=False
+    )
 
     class Meta:
         unique_together = ('name', 'measurement_unit')

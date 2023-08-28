@@ -36,8 +36,8 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
+            'measurement_unit'
         )
-        read_only_fields = ('name',)
 
 
 class IngredientRecipeSerializer(serializers.ModelSerializer):
@@ -66,9 +66,9 @@ class RecipeSerializer(serializers.ModelSerializer):
     tags_show = TagSerializer(read_only=True, many=True, source='tags')
     ingredients = IngredientRecipeSerializer(many=True,
                                              source='recipe_ingredients')
-    image = Base64ImageField(required=False, allow_null=True)
-    is_in_shopping_cart = serializers.BooleanField()
-    is_favorited = serializers.BooleanField()
+    image = Base64ImageField(required=True, allow_null=True)
+    is_in_shopping_cart = serializers.BooleanField(required=False)
+    is_favorited = serializers.BooleanField(required=False)
 
     class Meta:
         model = Recipe
@@ -84,6 +84,10 @@ class RecipeSerializer(serializers.ModelSerializer):
             'name',
             'text',
             'cooking_time')
+        read_only_fields = (
+            'is_favorited',
+            'is_in_shopping_cart',
+        )
 
     def to_representation(self, instance):
         response = super().to_representation(instance)

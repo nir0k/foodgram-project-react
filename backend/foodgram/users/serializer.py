@@ -107,6 +107,10 @@ class SubscribeSerializer(serializers.ModelSerializer):
                 'write_only': True,
                 'required': True
             },
+            'recipes': {
+                'read_only': True,
+                'required': False
+            },
         }
         validators = [
             UniqueTogetherValidator(
@@ -132,13 +136,16 @@ class SubscribeSerializer(serializers.ModelSerializer):
         return True
 
     def get_recipes(self, obj):
-        page_size = self.context['request'].query_params.get(
-            'recipes_limit') or 10
+        page_size = 10
+        page = 1
+        if 'request' in self.context:
+            page_size = self.context['request'].query_params.get(
+                'recipes_limit') or 10
+            page = self.context['request'].query_params.get('page') or 1
         paginator = Paginator(
             Recipe.objects.filter(author=obj.subscribing_user_id).all(),
             page_size
         )
-        page = self.context['request'].query_params.get('page') or 1
         recipes_page = paginator.page(page)
         serializer = RecipeSerializer(recipes_page, many=True).data
         return serializer

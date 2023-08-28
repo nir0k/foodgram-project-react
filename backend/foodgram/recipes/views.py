@@ -9,7 +9,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from users.permissions import IsAdmin, IsAuthorOrReadOnly, NonAuth, ReadOnly
+from users.permissions import IsAdmin, IsAuthorOrReadOnly, ReadOnly
 
 from .filters import RecipeFilter
 from .models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
@@ -18,10 +18,11 @@ from .serializers import (FavoriteSerializer, IngredientSerializer,
                           TagSerializer)
 
 
-class TagsViewSet(viewsets.ReadOnlyModelViewSet):
+class TagsViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = (IsAdmin, ReadOnly)
+    pagination_class = None
+    permission_classes = (Or(ReadOnly, IsAdmin),)
     filter_backends = (DjangoFilterBackend,)
     search_fields = ('slug',)
 
@@ -57,7 +58,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     queryset = Recipe.objects.all()
     permission_classes = (
-        Or(IsAuthorOrReadOnly, NonAuth),
+        Or(IsAuthorOrReadOnly, ReadOnly),
     )
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend,)
@@ -115,6 +116,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
 class IngredientsViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
+    permission_classes = (Or(ReadOnly, IsAdmin),)
     serializer_class = IngredientSerializer
     pagination_class = None
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
