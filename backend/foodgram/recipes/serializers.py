@@ -65,7 +65,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     tags_show = TagSerializer(read_only=True, many=True, source='tags')
     ingredients = IngredientRecipeSerializer(many=True,
                                              source='recipe_ingredients')
-    image = Base64ImageField(required=True, allow_null=True)
+    # image = Base64ImageField(required=True, allow_null=True)
     is_in_shopping_cart = serializers.BooleanField(required=False)
     is_favorited = serializers.BooleanField(required=False)
 
@@ -92,6 +92,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         response = super().to_representation(instance)
         response['tags'] = response.pop('tags_show')
         return response
+
+    def get_image(self, obj):
+        return obj.image.get_absolute_url()
 
     def list_of_ingredients(self, recipe, ingredients_data):
         for ingredient_data in ingredients_data:
@@ -138,9 +141,10 @@ class FavoriteSerializer(serializers.ModelSerializer):
     name = serializers.CharField(
         source='recipe.name',
         required=False)
-    image = serializers.CharField(
-        source='recipe.image',
-        required=False)
+    # image = serializers.CharField(
+    #     source='recipe.image',
+    #     required=False)
+    image = serializers.SerializerMethodField()
     cooking_time = serializers.IntegerField(
         source='recipe.cooking_time',
         required=False)
@@ -165,6 +169,9 @@ class FavoriteSerializer(serializers.ModelSerializer):
                 'write_only': True
             }
         }
+
+    def get_image(self, obj):
+        return obj.get_absolute_url()
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):

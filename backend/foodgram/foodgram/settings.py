@@ -30,6 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-j&h2d)+j2+gramb2$ela_r%%!w
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG_VALUE') == 'TRUE'
+# DEBUG = 'FALSE'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost 127.0.0.1').split(' ')
 
@@ -97,6 +98,12 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', 5432)
     }
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -137,6 +144,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'collected_static'
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
