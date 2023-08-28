@@ -17,6 +17,10 @@ from .serializers import (FavoriteSerializer, IngredientSerializer,
                           TagSerializer)
 
 
+class CustomSearchFilter(filters.SearchFilter):
+    search_param = "name"
+
+
 class TagsViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
@@ -118,7 +122,7 @@ class IngredientsViewSet(viewsets.ModelViewSet):
     permission_classes = (Or(ReadOnly, IsAdmin),)
     serializer_class = IngredientSerializer
     pagination_class = None
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filter_backends = (DjangoFilterBackend, CustomSearchFilter)
     search_fields = ('name',)
 
 

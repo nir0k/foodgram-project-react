@@ -37,6 +37,7 @@ docker compose up
 docker exec <название контерйнера backend> python /app/manage.py migrate
 docker exec <название контерйнера backend> python /app/manage.py createsuperuser
 ```
+</details>
 
 # Для входа на сайт
 - Вход для пользователей: http://localhost:7000/
