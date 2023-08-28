@@ -162,4 +162,3 @@ SIMPLE_JWT = {
 DJOSER = {
     'LOGIN_FIELD': 'email'
 }
-
