@@ -1,9 +1,8 @@
 # build env
 FROM node:13.12.0-alpine as build
-# FROM node:14.21.3 as build
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY . ./
 RUN npm run build
 # CMD cp -r build/. result_build
