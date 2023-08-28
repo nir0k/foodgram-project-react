@@ -1,6 +1,7 @@
 import csv
-from recipes.models import Ingredient
 from pathlib import Path
+
+from recipes.models import Ingredient
 
 file = open(Path(__file__).resolve().parent / 'ingredients.csv')
 read_file = csv.reader(file)
