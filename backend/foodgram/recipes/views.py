@@ -68,10 +68,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_queryset(self):
-        page_size = self.request.query_params.get('limit') or 6
-        page = self.request.query_params.get('page') or 1
-        self.paginator.max_page_size = page_size
-        self.paginator.page_size = page
+        self.paginator.page_size = self.request.query_params.get('limit') or 6
         if self.request.user.is_anonymous:
             return Recipe.objects.annotate(
                 is_in_shopping_cart=Value(False),
