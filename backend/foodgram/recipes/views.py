@@ -94,20 +94,22 @@ class RecipesViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request, *args, **kwargs):
         file_name = 'shopping_cart.txt'
-        lines = []
-        num = 1
+        shoplist = {}
         for shoppingcart in self.request.user.shoppingscart.all():
-            lines.append('{0}. {1}:'.format(
-                num,
-                shoppingcart.recipe.name
-            ))
             for ingredient in shoppingcart.recipe.recipe_ingredients.all():
-                lines.append('    - {0}: {1} ({2});'.format(
-                    ingredient.ingredient,
-                    ingredient.amount,
-                    ingredient.ingredient.measurement_unit
-                ))
-            lines.append('')
+                if ingredient.ingredient not in shoplist:
+                    shoplist[ingredient.ingredient] = ingredient.amount
+                else:
+                    shoplist[ingredient.ingredient] += ingredient.amount
+        num = 1
+        lines = []
+        lines.append('Shopping List:')
+        for ingredient in shoplist:
+            lines.append('  {0}.  {1}: {2} ({3})'.format(
+                num,
+                ingredient.name,
+                shoplist[ingredient],
+                ingredient.measurement_unit))
             num += 1
         response_content = '\n'.join(lines)
         response = HttpResponse(response_content,
