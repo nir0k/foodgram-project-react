@@ -5,7 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_condition import Or
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from users.permissions import IsAdmin, IsAuthorOrReadOnly, ReadOnly
@@ -63,17 +63,20 @@ class RecipesViewSet(viewsets.ModelViewSet):
     permission_classes = (
         Or(IsAuthorOrReadOnly, ReadOnly),
     )
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
     def get_queryset(self):
+        page_size = self.request.query_params.get('limit') or 6
+        page = self.request.query_params.get('page') or 1
+        self.paginator.max_page_size = page_size
+        self.paginator.page_size = page
         if self.request.user.is_anonymous:
             return Recipe.objects.annotate(
                 is_in_shopping_cart=Value(False),
                 is_favorited=Value(False)
             ).all()
-
         queryset = Recipe.objects.annotate(
             is_favorited=Exists(Favorite.objects.filter(
                 user=self.request.user, recipe=OuterRef('pk'))),
