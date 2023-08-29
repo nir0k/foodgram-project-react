@@ -146,7 +146,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'collected_static'
 
 
-MEDIA_URL = 'https://foodgram-book.ddns.net/media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
