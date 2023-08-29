@@ -5,7 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_condition import Or
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from users.permissions import IsAdmin, IsAuthorOrReadOnly, ReadOnly
@@ -63,7 +63,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     permission_classes = (
         Or(IsAuthorOrReadOnly, ReadOnly),
     )
-    pagination_class = PageNumberPagination
+    pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
