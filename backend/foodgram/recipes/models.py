@@ -1,4 +1,4 @@
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from users.models import User
 
@@ -19,8 +19,6 @@ class Ingredient(models.Model):
     name = models.CharField(max_length=254, null=False, blank=False)
     measurement_unit = models.CharField(
         max_length=100,
-        null=False,
-        blank=False
     )
 
     class Meta:
@@ -45,12 +43,12 @@ class Recipe(models.Model):
     image = models.ImageField(
         upload_to='recipes/images/',
         null=True,
-        default=None
     )
     name = models.CharField(max_length=200, null=False, blank=False)
     text = models.TextField(null=False, blank=False)
     cooking_time = models.IntegerField(
-        validators=[MinValueValidator(1)],
+        validators=[MinValueValidator(1),
+                    MaxValueValidator(1440)],
         default=1
     )
     created = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -75,7 +73,8 @@ class RecipeIngredient(models.Model):
                                blank=True,)
     amount = models.FloatField(null=False,
                                blank=False,
-                               validators=[MinValueValidator(0.1)],
+                               validators=[MinValueValidator(0.1),
+                                           MaxValueValidator(1000)],
                                default=0.1)
 
     class Meta:
@@ -94,12 +93,10 @@ class RecipeIngredient(models.Model):
 class TagRecipe(models.Model):
     tag = models.ForeignKey(Tag,
                             on_delete=models.CASCADE,
-                            null=True,
                             blank=True,)
     recipe = models.ForeignKey(Recipe,
                                on_delete=models.CASCADE,
                                related_name="recipe_tags",
-                               null=True,
                                blank=True,
                                )
 

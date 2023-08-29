@@ -1,7 +1,7 @@
 import base64
 
 from django.core.files.base import ContentFile
-from django.shortcuts import get_object_or_404
+from django.db import transaction
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from users.serializer import UserSerializer
@@ -94,22 +94,23 @@ class RecipeSerializer(serializers.ModelSerializer):
         return response
 
     def list_of_ingredients(self, recipe, ingredients_data):
-        for ingredient_data in ingredients_data:
-            ingredient = get_object_or_404(
-                Ingredient,
-                pk=ingredient_data.get('ingredient').get('id')
-            )
-            RecipeIngredient.objects.create(
-                recipe=recipe,
-                ingredient=ingredient,
-                amount=ingredient_data.get('amount')
-            )
+        RecipeIngredient.objects.bulk_create(
+            objs=[RecipeIngredient(
+                ingredient_id=q['ingredient']['id'],
+                amount=q['amount'],
+                recipe=recipe
+            ) for q in ingredients_data]
+        )
 
     def list_of_tags(self, recipe, tags_data):
-        for tag_data in tags_data:
-            tag = get_object_or_404(Tag, pk=tag_data.id)
-            TagRecipe.objects.create(recipe=recipe, tag=tag)
+        TagRecipe.objects.bulk_create(
+            objs=[TagRecipe(
+                tag=q,
+                recipe=recipe
+            ) for q in tags_data]
+        )
 
+    @transaction.atomic
     def create(self, validated_data):
         ingredients_data = validated_data.pop('recipe_ingredients')
         tags_data = validated_data.pop('tags')
@@ -119,6 +120,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             recipe=recipe, ingredients_data=ingredients_data)
         return recipe
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         ingredients_data = validated_data.pop('recipe_ingredients')
         tags_data = validated_data.pop('tags')
