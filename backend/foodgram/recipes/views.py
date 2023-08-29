@@ -109,7 +109,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 num,
                 ingredient.name,
                 shoplist[ingredient],
-                ingredient.measurement_unit))
+                ingredient.measurement_unit,))
             num += 1
         response_content = '\n'.join(lines)
         response = HttpResponse(response_content,
