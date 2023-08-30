@@ -38,9 +38,8 @@ cd foodgram-project-react
 docker compose up
 ```
 
-При первом запуске выполнить миграцию и создать суперпользователя
+При первом запуске создать суперпользователя
 ```
-docker exec <название контерйнера backend> python /app/manage.py migrate
 docker exec <название контерйнера backend> python /app/manage.py createsuperuser
 ```
 </details>
